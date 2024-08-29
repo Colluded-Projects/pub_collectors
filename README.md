@@ -12,3 +12,14 @@ python3 app.py
 ## Credits
 <will add your account usernames later.>
 
+## How the app works?
+```mermaid
+graph TD
+    A[Input] --> B[Excel or Bibtex file format]
+    B --> C[Run through specific parser] 
+    C --> D[Gather the names]
+    D --> F[Do web scrapping, gather data :: publication records and citations ::] 
+    F --> G[Allow queries]
+    G --> H[Display statistics based on query]
+    H --> i[Option to Export]
+```
