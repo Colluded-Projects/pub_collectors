@@ -14,12 +14,19 @@ python3 app.py
 
 ## How the app works?
 ```mermaid
+```mermaid
 graph TD
-    A[Input] --> B[Excel or Bibtex file format]
-    B --> C[Run through specific parser] 
-    C --> D[Gather the names]
-    D --> F[Do web scrapping, gather data :: publication records and citations ::] 
-    F --> G[Allow queries]
-    G --> H[Display statistics based on query]
-    H --> i[Option to Export]
+    A[Input] -- Faculty name --> B[Excel parser]
+    A[Input] -- Publication record --> C[Bibtex parser]
+    B --> D[Name]
+    B --> E[Title]
+    B --> F[Year]
+    B --> G[Venue: Conf./Journal]
+    B --> H[Generate Output which accepts queries]
+    C -- record of conf. --> H[Generate Output which accepts queries]
+    C -- record of journal --> H[Generate Output which accepts queries]
+    H --> I[?q=All - Generate publication record presented in conf. AND journal for all years]
+    H --> J[?q=y-Journal - Year wise Journal publication record]
+    H --> K[?q=y-Conf. - Year wise Conf. publication record]
+    H --> L[?q=y-range - publication record based on custom year duration entered]
 ```
