@@ -5,7 +5,6 @@ import requests
 import io
 
 app = Flask(__name__)
-
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
         search_query = scholarly.search_author(author_name)
@@ -134,16 +133,27 @@ def save_to_excel(journals, conferences, miscellaneous):
     output.seek(0)
     return output
 
+def parse_excel(fp):
+    df = pd.read_excel(fp)
+    for author_nm in df.iloc[:,0]:
+        return author_nm
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        author_name = request.form.get('author_name')
+        file_path = request.form.get('author_name')
+        
+        author_name = parse_excel(file_path)
         start_year = request.form.get('start_year')
         end_year = request.form.get('end_year')
         start_year = int(start_year) if start_year and start_year.isdigit() else None
         end_year = int(end_year) if end_year and end_year.isdigit() else None
 
-        journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)
+        journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)        
+        global jour, conf, misc
+        jour = journals
+        conf = conferences
+        misc = miscellaneous
 
         return render_template('results.html',
                                journals=journals,
@@ -165,9 +175,7 @@ def download():
     end_year = request.args.get('end_year')
     start_year = int(start_year) if start_year and start_year.isdigit() else None
     end_year = int(end_year) if end_year and end_year.isdigit() else None
-
-    journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)
-
+    
     publication_type = request.args.get('publication_type')
     if publication_type == 'journal':
         conferences = {}
@@ -176,7 +184,7 @@ def download():
         journals = {}
         miscellaneous = []
 
-    excel_file = save_to_excel(journals, conferences, miscellaneous)
+    excel_file = save_to_excel(jour, conf, misc)
 
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
 
