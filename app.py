@@ -3,26 +3,8 @@ import pandas as pd
 from scholarly import scholarly
 import requests
 import io
-from functools import lru_cache
 
 app = Flask(__name__)
-
-@lru_cache(maxsize=100)
-def fetch_crossref_details(title):
-    url = f"https://api.crossref.org/works"
-    params = {'query.title': title}
-    response = requests.get(url, params=params)
-
-    if response.status_code == 200:
-        data = response.json()
-        items = data.get('message', {}).get('items', [])
-        if items:
-            item = items[0]
-            return {
-                'journal_or_conference': item.get('container-title', ['N/A'])[0],
-                'publisher': item.get('publisher', 'N/A')
-            }
-    return {'journal_or_conference': 'N/A', 'publisher': 'N/A'}
 
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
@@ -54,13 +36,13 @@ def fetch_publications(author_name, start_year=None, end_year=None):
             else:
                 year_label = int(year)
 
-            if start_year is not None and end_year is not None:
-                if not (start_year <= year_label <= end_year):
-                    continue
-
             title = pub_info.get('title', 'No Title')
             citation_id = pub.get('author_pub_id', 'No Citation ID')
             citation_url = f"https://scholar.google.co.in/citations?view_op=view_citation&hl=en&user={author['scholar_id']}&citation_for_view={citation_id}"
+
+            if start_year is not None and end_year is not None:
+                if not (start_year <= year_label <= end_year):
+                    continue
 
             details = {
                 'Title': title,
@@ -75,7 +57,6 @@ def fetch_publications(author_name, start_year=None, end_year=None):
             details.update(crossref_data)
 
             journal_or_conference = details.get('journal_or_conference', '').lower()
-            
             if 'conference' in journal_or_conference or 'workshop' in journal_or_conference:
                 conferences.setdefault(year_label, []).append(details)
             elif 'journal' in journal_or_conference or 'proceedings' in journal_or_conference:
@@ -87,7 +68,23 @@ def fetch_publications(author_name, start_year=None, end_year=None):
     
     except Exception as e:
         print(f"An error occurred: {e}")
-        return {}, {}, []
+        return None, None, None
+
+def fetch_crossref_details(title):
+    url = f"https://api.crossref.org/works"
+    params = {'query.title': title}
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        items = data.get('message', {}).get('items', [])
+        if items:
+            item = items[0]
+            return {
+                'journal_or_conference': item.get('container-title', ['N/A'])[0],
+                'publisher': item.get('publisher', 'N/A')
+            }
+    return {'journal_or_conference': 'N/A', 'publisher': 'N/A'}
 
 def save_to_excel(journals, conferences, miscellaneous):
     output = io.BytesIO()
@@ -159,6 +156,8 @@ def index():
 
     return render_template('index.html')
 
+
+
 @app.route('/download')
 def download():
     author_name = request.args.get('author_name')
@@ -180,6 +179,7 @@ def download():
     excel_file = save_to_excel(journals, conferences, miscellaneous)
 
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
