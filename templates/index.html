@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Publication Search</h1>
+        </header>
+        <main>
+            <div class="form-container">
+                <form method="POST" action="/">
+                    <div class="form-group">
+                        <label for="author_name">Author Name:</label>
+                        <input type="text" id="author_name" name="author_name" placeholder="Enter author name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_year">Start Year:</label>
+                        <input type="number" id="start_year" name="start_year" placeholder="Enter start year">
+                    </div>
+                    <div class="form-group">
+                        <label for="end_year">End Year:</label>
+                        <input type="number" id="end_year" name="end_year" placeholder="Enter end year">
+                    </div>
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+        </main>
+        <footer>
+            <p>&copy; 2024 Publication Search Application. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
