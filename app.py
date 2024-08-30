@@ -145,18 +145,18 @@ def index():
 
         journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)
 
-        excel_file = save_to_excel(journals, conferences, miscellaneous)
-
-        return render_template('results.html', 
-            journals=journals,
-            conferences=conferences,
-            miscellaneous=miscellaneous,
-            download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
-            author_name=author_name,
-            start_year=start_year,
-            end_year=end_year)
+        return render_template('results.html',
+                               journals=journals,
+                               conferences=conferences,
+                               miscellaneous=miscellaneous,
+                               download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
+                               author_name=author_name,
+                               start_year=start_year,
+                               end_year=end_year)
 
     return render_template('index.html')
+
+
 
 @app.route('/download')
 def download():
@@ -167,9 +167,19 @@ def download():
     end_year = int(end_year) if end_year and end_year.isdigit() else None
 
     journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)
+
+    publication_type = request.args.get('publication_type')
+    if publication_type == 'journal':
+        conferences = {}
+        miscellaneous = []
+    elif publication_type == 'conference':
+        journals = {}
+        miscellaneous = []
+
     excel_file = save_to_excel(journals, conferences, miscellaneous)
-    
+
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
