@@ -13,10 +13,10 @@
         </header>
         <main>
             <div class="form-container">
-                <form method="POST" action="/">
+                <form method="POST" action="/" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="author_name">Excel file path:</label>
-                        <input type="text" id="author_name" name="author_name" placeholder="Enter Excel File name for ex. pub.xlsx" required>
+                        <label for="file">Excel file:</label>
+                        <input type="file" id="file" name="file" accept=".xlsx" required>
                     </div>
                     <div class="form-group">
                         <label for="start_year">Start Year:</label>

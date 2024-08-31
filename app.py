@@ -5,6 +5,7 @@ import requests
 import io
 
 app = Flask(__name__)
+
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
         search_query = scholarly.search_author(author_name)
@@ -133,40 +134,39 @@ def save_to_excel(journals, conferences, miscellaneous):
     output.seek(0)
     return output
 
-def parse_excel(fp):
-    df = pd.read_excel(fp)
-    for author_nm in df.iloc[:,0]:
+def parse_excel(file):
+    df = pd.read_excel(file)
+    for author_nm in df.iloc[:, 0]:
         return author_nm
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        file_path = request.form.get('author_name')
+        file = request.files.get('file')
         
-        author_name = parse_excel(file_path)
-        start_year = request.form.get('start_year')
-        end_year = request.form.get('end_year')
-        start_year = int(start_year) if start_year and start_year.isdigit() else None
-        end_year = int(end_year) if end_year and end_year.isdigit() else None
+        if file:
+            author_name = parse_excel(file)
+            start_year = request.form.get('start_year')
+            end_year = request.form.get('end_year')
+            start_year = int(start_year) if start_year and start_year.isdigit() else None
+            end_year = int(end_year) if end_year and end_year.isdigit() else None
 
-        journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)        
-        global jour, conf, misc
-        jour = journals
-        conf = conferences
-        misc = miscellaneous
+            journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)        
+            global jour, conf, misc
+            jour = journals
+            conf = conferences
+            misc = miscellaneous
 
-        return render_template('results.html',
-                               journals=journals,
-                               conferences=conferences,
-                               miscellaneous=miscellaneous,
-                               download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
-                               author_name=author_name,
-                               start_year=start_year,
-                               end_year=end_year)
+            return render_template('results.html',
+                                   journals=journals,
+                                   conferences=conferences,
+                                   miscellaneous=miscellaneous,
+                                   download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
+                                   author_name=author_name,
+                                   start_year=start_year,
+                                   end_year=end_year)
 
     return render_template('index.html')
-
-
 
 @app.route('/download')
 def download():
@@ -187,7 +187,6 @@ def download():
     excel_file = save_to_excel(jour, conf, misc)
 
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
