@@ -15,8 +15,8 @@ python3 app.py
 ## How the app works?
 ```mermaid
 graph TD
-    A[Input] -- Faculty name --> B[Excel parser]
-    A[Input] -- Publication record --> C[Bibtex parser]
+    A[Input] -- Excel file (Faculty name) --> B[Excel parser]
+    A[Input] --Bibtex file (Publication record) --> C[Bibtex parser]
     B --> D[Name]
     B --> E[Title]
     B --> F[Year]
