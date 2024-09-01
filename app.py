@@ -3,8 +3,22 @@ import pandas as pd
 from scholarly import scholarly
 import requests
 import io
+from docx import Document
+import google.generativeai as genai
 
 app = Flask(__name__)
+
+# Configure Gemini API key directly in the code
+genai.configure(api_key="IzaSyA_DDm4lZdhMPbKoHt3ftuCT5iooeZNTZQ") #this is not mine lol
+
+def generate_summary(text):
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(text)
+        return response.text
+    except Exception as e:
+        print(f"An error occurred with Gemini API: {e}")
+        return "Summary not available."
 
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
@@ -16,6 +30,8 @@ def fetch_publications(author_name, start_year=None, end_year=None):
         journals = {}
         conferences = {}
         miscellaneous = []
+        total_citations = 0
+        total_papers = 0
 
         for pub in publications:
             pub_info = pub.get('bib', {})
@@ -29,20 +45,24 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                     'Venue': pub_info.get('venue', 'N/A'),
                     'Publisher': pub_info.get('publisher', 'N/A'),
                     'Cited By': pub.get('num_citations', 'N/A'),
-                    'Year': year_label
+                    'Year': year_label,
+                    'Summary': generate_summary(pub_info.get('title', 'No Title'))
                 }
                 miscellaneous.append(details)
                 continue
             else:
                 year_label = int(year)
 
-            title = pub_info.get('title', 'No Title')
-            citation_id = pub.get('author_pub_id', 'No Citation ID')
-            citation_url = f"https://scholar.google.co.in/citations?view_op=view_citation&hl=en&user={author['scholar_id']}&citation_for_view={citation_id}"
-
             if start_year is not None and end_year is not None:
                 if not (start_year <= year_label <= end_year):
                     continue
+
+            total_citations += int(pub.get('num_citations', 0))
+            total_papers += 1
+
+            title = pub_info.get('title', 'No Title')
+            citation_id = pub.get('author_pub_id', 'No Citation ID')
+            citation_url = f"https://scholar.google.co.in/citations?view_op=view_citation&hl=en&user={author['scholar_id']}&citation_for_view={citation_id}"
 
             details = {
                 'Title': title,
@@ -50,25 +70,30 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                 'Venue': pub_info.get('venue', 'N/A'),
                 'Publisher': pub_info.get('publisher', 'N/A'),
                 'Cited By': pub.get('num_citations', 'N/A'),
-                'Year': year_label
+                'Year': year_label,
+                'Summary': generate_summary(title)
             }
 
             crossref_data = fetch_crossref_details(title)
             details.update(crossref_data)
 
-            journal_or_conference = details.get('journal_or_conference', '').lower()
-            if 'conference' in journal_or_conference or 'workshop' in journal_or_conference:
+            if 'conference' in details.get('journal_or_conference', '').lower():
                 conferences.setdefault(year_label, []).append(details)
-            elif 'journal' in journal_or_conference or 'proceedings' in journal_or_conference:
+            elif 'journal' in details.get('journal_or_conference', '').lower():
                 journals.setdefault(year_label, []).append(details)
             else:
                 miscellaneous.append(details)
 
-        return journals, conferences, miscellaneous
+        summary_text = (f"Between {start_year} and {end_year}, {author_name} published a total of {total_papers} research papers "
+                        f"with a cumulative citation count of {total_citations}. The research primarily focused on areas including "
+                        f"AI and generative models.")
+
+        return journals, conferences, miscellaneous, summary_text
     
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None, None, None
+        return None, None, None, "Summary not available."
+
 
 def fetch_crossref_details(title):
     url = f"https://api.crossref.org/works"
@@ -139,6 +164,88 @@ def parse_excel(file):
     for author_nm in df.iloc[:, 0]:
         return author_nm
 
+def save_to_docx(journals, conferences, miscellaneous):
+    doc = Document()
+    doc.add_heading('Publications Report', level=1)
+
+    def add_table(title, data):
+        if data:
+            doc.add_heading(title, level=2)
+            table = doc.add_table(rows=1, cols=len(data[0]))
+            hdr_cells = table.rows[0].cells
+            headers = list(data[0].keys())
+            for i, header in enumerate(headers):
+                hdr_cells[i].text = header
+            for row in data:
+                row_cells = table.add_row().cells
+                for i, header in enumerate(headers):
+                    row_cells[i].text = str(row[header])
+
+    journal_data = []
+    for year, papers in sorted(journals.items()):
+        for paper in papers:
+            journal_data.append({
+                'Year': year,
+                'Type': 'Journal',
+                'Title': paper['Title'],
+                'Citation Link': paper['Citation Link'],
+                'Venue': paper.get('journal_or_conference', 'N/A'),
+                'Publisher': paper['Publisher'],
+                'Cited By': paper['Cited By']
+            })
+    add_table('Journals', journal_data)
+
+    conference_data = []
+    for year, papers in sorted(conferences.items()):
+        for paper in papers:
+            conference_data.append({
+                'Year': year,
+                'Type': 'Conference',
+                'Title': paper['Title'],
+                'Citation Link': paper['Citation Link'],
+                'Venue': paper.get('journal_or_conference', 'N/A'),
+                'Publisher': paper['Publisher'],
+                'Cited By': paper['Cited By']
+            })
+    add_table('Conferences', conference_data)
+
+    misc_data = []
+    for paper in miscellaneous:
+        misc_data.append({
+            'Title': paper['Title'],
+            'Citation Link': paper['Citation Link'],
+            'Venue': paper['Venue'],
+            'Publisher': paper['Publisher'],
+            'Cited By': paper['Cited By'],
+            'Year': paper['Year']
+        })
+    add_table('Miscellaneous', misc_data)
+
+    output = io.BytesIO()
+    doc.save(output)
+    output.seek(0)
+    return output
+
+@app.route('/download_docx')
+def download_docx():
+    author_name = request.args.get('author_name')
+    start_year = request.args.get('start_year')
+    end_year = request.args.get('end_year')
+    start_year = int(start_year) if start_year and start_year.isdigit() else None
+    end_year = int(end_year) if end_year and end_year.isdigit() else None
+
+    publication_type = request.args.get('publication_type')
+    if publication_type == 'journal':
+        conferences = {}
+        miscellaneous = []
+    elif publication_type == 'conference':
+        journals = {}
+        miscellaneous = []
+
+    docx_file = save_to_docx(jour, conf, misc)
+
+    return send_file(docx_file, as_attachment=True, download_name='publications.docx')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -151,7 +258,7 @@ def index():
             start_year = int(start_year) if start_year and start_year.isdigit() else None
             end_year = int(end_year) if end_year and end_year.isdigit() else None
 
-            journals, conferences, miscellaneous = fetch_publications(author_name, start_year, end_year)        
+            journals, conferences, miscellaneous, summary_text = fetch_publications(author_name, start_year, end_year)
             global jour, conf, misc
             jour = journals
             conf = conferences
@@ -164,9 +271,11 @@ def index():
                                    download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
                                    author_name=author_name,
                                    start_year=start_year,
-                                   end_year=end_year)
+                                   end_year=end_year,
+                                   summary_text=summary_text)  # Include summary_text here
 
     return render_template('index.html')
+
 
 @app.route('/download')
 def download():

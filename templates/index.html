@@ -5,15 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publication Search</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Add styles for the loading screen */
+        .loading-overlay {
+            display: none; /* Hide by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-align: center;
+            line-height: 100vh;
+            font-size: 24px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">Loading...</div>
     <div class="container">
         <header>
             <h1>Publication Search</h1>
         </header>
         <main>
             <div class="form-container">
-                <form method="POST" action="/" enctype="multipart/form-data">
+                <form method="POST" action="/" enctype="multipart/form-data" onsubmit="showLoadingScreen()">
                     <div class="form-group">
                         <label for="file">Excel file:</label>
                         <input type="file" id="file" name="file" accept=".xlsx" required>
@@ -34,5 +52,10 @@
             <p>&copy; SIH 2024 TEAM: Pub. Collectors</p>
         </footer>
     </div>
+    <script>
+        function showLoadingScreen() {
+            document.getElementById('loadingOverlay').style.display = 'block';
+        }
+    </script>
 </body>
 </html>

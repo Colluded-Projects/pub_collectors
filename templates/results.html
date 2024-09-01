@@ -10,20 +10,47 @@
     <div class="container">
         <header>
             <h1>Search Results for "{{ author_name }}"</h1>
-            {% if start_year and end_year %}<p>Years: {{ start_year }} - {{ end_year }}</p>{% endif %}
+            {% if start_year and end_year %}
+                <p>Years: {{ start_year }} - {{ end_year }}</p>
+                <p>{{ summary_text }}</p>
+            {% endif %}
             <div class="filter-options">
                 <a href="{{ download_url }}&publication_type=journal" class="button">Download Journal Papers</a>
                 <a href="{{ download_url }}&publication_type=conference" class="button">Download Conference Papers</a>
                 <a href="{{ download_url }}" class="button">Download All Papers</a>
+                <a href="{{ url_for('download_docx', author_name=author_name, start_year=start_year, end_year=end_year) }}" class="button">Download DOCX</a>
             </div>
+            
         </header>
         <main>
             {% if journals %}
                 <h2>Journals</h2>
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Year</th><th>Title</th><th>Citation Link</th><th>Venue</th><th>Publisher</th><th>Cited By</th></tr></thead>
-                        <tbody>{% for year, papers in journals.items() %}{% for paper in papers %}<tr><td>{{ year }}</td><td>{{ paper.Title }}</td><td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td><td>{{ paper.Venue }}</td><td>{{ paper.Publisher }}</td><td>{{ paper['Cited By'] }}</td></tr>{% endfor %}{% endfor %}</tbody>
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Title</th>
+                                <th>Citation Link</th>
+                                <th>Venue</th>
+                                <th>Publisher</th>
+                                <th>Cited By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for year, papers in journals.items() %}
+                                {% for paper in papers %}
+                                    <tr>
+                                        <td>{{ year }}</td>
+                                        <td>{{ paper.Title }}</td>
+                                        <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
+                                        <td>{{ paper.Venue }}</td>
+                                        <td>{{ paper.Publisher }}</td>
+                                        <td>{{ paper['Cited By'] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
                     </table>
                 </div>
             {% endif %}
@@ -31,32 +58,62 @@
                 <h2>Conferences</h2>
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Year</th><th>Title</th><th>Citation Link</th><th>Venue</th><th>Publisher</th><th>Cited By</th></tr></thead>
-                        <tbody>{% for year, papers in conferences.items() %}{% for paper in papers %}<tr><td>{{ year }}</td><td>{{ paper.Title }}</td><td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td><td>{{ paper.Venue }}</td><td>{{ paper.Publisher }}</td><td>{{ paper['Cited By'] }}</td></tr>{% endfor %}{% endfor %}</tbody>
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Title</th>
+                                <th>Citation Link</th>
+                                <th>Venue</th>
+                                <th>Publisher</th>
+                                <th>Cited By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for year, papers in conferences.items() %}
+                                {% for paper in papers %}
+                                    <tr>
+                                        <td>{{ year }}</td>
+                                        <td>{{ paper.Title }}</td>
+                                        <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
+                                        <td>{{ paper.Venue }}</td>
+                                        <td>{{ paper.Publisher }}</td>
+                                        <td>{{ paper['Cited By'] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
                     </table>
                 </div>
             {% endif %}
             {% if miscellaneous %}
-    <h2>Miscellaneous</h2>
-    <div class="table-container">
-        <table>
-            <thead><tr><th>Title</th><th>Citation Link</th><th>Venue</th><th>Publisher</th><th>Cited By</th><th>Year</th></tr></thead>
-            <tbody>
-                {% for paper in miscellaneous %}
-                <tr>
-                    <td>{{ paper.Title }}</td>
-                    <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
-                    <td>{{ paper.Venue }}</td>
-                    <td>{{ paper.Publisher }}</td>
-                    <td>{{ paper['Cited By'] }}</td>
-                    <td>{{ paper.Year }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endif %}
-
+                <h2>Miscellaneous</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Citation Link</th>
+                                <th>Venue</th>
+                                <th>Publisher</th>
+                                <th>Cited By</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paper in miscellaneous %}
+                                <tr>
+                                    <td>{{ paper.Title }}</td>
+                                    <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
+                                    <td>{{ paper.Venue }}</td>
+                                    <td>{{ paper.Publisher }}</td>
+                                    <td>{{ paper['Cited By'] }}</td>
+                                    <td>{{ paper.Year }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </main>
     </div>
 </body>
