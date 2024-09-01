@@ -18,7 +18,9 @@
                 <a href="{{ download_url }}&publication_type=journal" class="button">Download Journal Papers</a>
                 <a href="{{ download_url }}&publication_type=conference" class="button">Download Conference Papers</a>
                 <a href="{{ download_url }}" class="button">Download All Papers</a>
-                <a href="{{ url_for('download_docx', author_name=author_name, start_year=start_year, end_year=end_year) }}" class="button">Download DOCX</a>
+                <br><br><a href="{{ download_url }}&publication_type=docjour" class="button">Download Journal Papers in DOCX</a>
+                <a href="{{ download_url }}&publication_type=docconf" class="button">Download Conference Papers in DOCX</a>
+                <a href="{{ download_url }}&publication_type=docall" class="button">Download All Papers in DOCX</a>
             </div>
             
         </header>

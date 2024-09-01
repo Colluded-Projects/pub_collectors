@@ -225,21 +225,6 @@ def save_to_docx(journals, conferences, miscellaneous):
     output.seek(0)
     return output
 
-@app.route('/download_docx')
-def download_docx():
-    author_name = request.args.get('author_name')
-    publication_type = request.args.get('publication_type')
-    if publication_type == 'journal':
-        docx_file = save_to_docx(jour, {}, [])
-        return send_file(docx_file, as_attachment=True, download_name='publications_journals.docx')
-    elif publication_type == 'conference':
-        docx_file = save_to_docx({}, conf, [])
-        return send_file(docx_file, as_attachment=True, download_name='publications_conf.docx')
-
-    docx_file = save_to_docx(jour, conf, misc)
-
-    return send_file(docx_file, as_attachment=True, download_name='publications.docx')
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -259,9 +244,9 @@ def index():
             misc = miscellaneous
 
             return render_template('results.html',
-                                   journals=journals,
-                                   conferences=conferences,
-                                   miscellaneous=miscellaneous,
+                                   journals=jour,
+                                   conferences=conf,
+                                   miscellaneous=misc,
                                    download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
                                    author_name=author_name,
                                    start_year=start_year,
@@ -269,7 +254,6 @@ def index():
                                    summary_text=summary_text)  # Include summary_text here
 
     return render_template('index.html')
-
 
 @app.route('/download')
 def download():
@@ -282,6 +266,15 @@ def download():
     elif publication_type == 'conference':
         excel_file = save_to_excel({}, conf, [])
         return send_file(excel_file, as_attachment=True, download_name='publications_conf.xlsx')
+    elif publication_type == 'docjour':
+        docx_file = save_to_docx(jour, {}, [])
+        return send_file(docx_file, as_attachment=True, download_name='publications_journals.docx')
+    elif publication_type == 'docconf':
+        docx_file = save_to_docx({}, conf, [])
+        return send_file(docx_file, as_attachment=True, download_name='publications_conf.docx')
+    elif publication_type=='docall':
+        docx_file = save_to_docx(jour, conf, misc)
+        return send_file(docx_file, as_attachment=True, download_name='publications.docx')
 
     excel_file = save_to_excel(jour, conf, misc)
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
