@@ -4,21 +4,21 @@ from scholarly import scholarly
 import requests
 import io
 from docx import Document
-import google.generativeai as genai
+#import google.generativeai as genai
 
 app = Flask(__name__)
 
 # Configure Gemini API key directly in the code
-genai.configure(api_key="IzaSyA_DDm4lZdhMPbKoHt3ftuCT5iooeZNTZQ") #this is not mine lol
+#genai.configure(api_key="IzaSyA_DDm4lZdhMPbKoHt3ftuCT5iooeZNTZQ") #this is not mine lol
 
-def generate_summary(text):
-    try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(text)
-        return response.text
-    except Exception as e:
-        print(f"An error occurred with Gemini API: {e}")
-        return "Summary not available."
+# def generate_summary(text):
+#     try:
+#         model = genai.GenerativeModel("gemini-1.5-flash")
+#         response = model.generate_content(text)
+#         return response.text
+#     except Exception as e:
+#         print(f"An error occurred with Gemini API: {e}")
+#         return "Summary not available."
 
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
@@ -46,12 +46,12 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                     'Publisher': pub_info.get('publisher', 'N/A'),
                     'Cited By': pub.get('num_citations', 'N/A'),
                     'Year': year_label,
-                    'Summary': generate_summary(pub_info.get('title', 'No Title'))
+                    #'Summary': generate_summary(pub_info.get('title', 'No Title'))
                 }
                 miscellaneous.append(details)
                 continue
-            else:
-                year_label = int(year)
+            
+            year_label = int(year)
 
             if start_year is not None and end_year is not None:
                 if not (start_year <= year_label <= end_year):
@@ -71,7 +71,7 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                 'Publisher': pub_info.get('publisher', 'N/A'),
                 'Cited By': pub.get('num_citations', 'N/A'),
                 'Year': year_label,
-                'Summary': generate_summary(title)
+                #'Summary': generate_summary(title)
             }
 
             crossref_data = fetch_crossref_details(title)
@@ -228,18 +228,13 @@ def save_to_docx(journals, conferences, miscellaneous):
 @app.route('/download_docx')
 def download_docx():
     author_name = request.args.get('author_name')
-    start_year = request.args.get('start_year')
-    end_year = request.args.get('end_year')
-    start_year = int(start_year) if start_year and start_year.isdigit() else None
-    end_year = int(end_year) if end_year and end_year.isdigit() else None
-
     publication_type = request.args.get('publication_type')
     if publication_type == 'journal':
-        conferences = {}
-        miscellaneous = []
+        docx_file = save_to_docx(jour, {}, [])
+        return send_file(docx_file, as_attachment=True, download_name='publications_journals.docx')
     elif publication_type == 'conference':
-        journals = {}
-        miscellaneous = []
+        docx_file = save_to_docx({}, conf, [])
+        return send_file(docx_file, as_attachment=True, download_name='publications_conf.docx')
 
     docx_file = save_to_docx(jour, conf, misc)
 
@@ -279,21 +274,16 @@ def index():
 @app.route('/download')
 def download():
     author_name = request.args.get('author_name')
-    start_year = request.args.get('start_year')
-    end_year = request.args.get('end_year')
-    start_year = int(start_year) if start_year and start_year.isdigit() else None
-    end_year = int(end_year) if end_year and end_year.isdigit() else None
-    
+    global jour, conf, misc
     publication_type = request.args.get('publication_type')
     if publication_type == 'journal':
-        conferences = {}
-        miscellaneous = []
+        excel_file = save_to_excel(jour, {}, [])
+        return send_file(excel_file, as_attachment=True, download_name='publications_journals.xlsx')
     elif publication_type == 'conference':
-        journals = {}
-        miscellaneous = []
+        excel_file = save_to_excel({}, conf, [])
+        return send_file(excel_file, as_attachment=True, download_name='publications_conf.xlsx')
 
     excel_file = save_to_excel(jour, conf, misc)
-
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
 
 if __name__ == '__main__':
