@@ -85,8 +85,7 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                 miscellaneous.append(details)
 
         summary_text = (f"Between {start_year} and {end_year}, {author_name} published a total of {total_papers} research papers "
-                        f"with a cumulative citation count of {total_citations}. The research primarily focused on areas including "
-                        f"AI and generative models.")
+                        f"with a cumulative citation count of {total_citations}.")
 
         return journals, conferences, miscellaneous, summary_text
     
