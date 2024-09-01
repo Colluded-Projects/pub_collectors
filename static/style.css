@@ -1,44 +1,33 @@
-
+/* Default (Light) Theme */
 body {
-  font-family: 'Arial', sans-serif;
-  margin: 0;
-  padding: 0;
-  color: #333;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: black;
-  background-image: url('https://images.unsplash.com/photo-1554110397-9bac083977c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden; /* Prevents scrolling on the body */
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #fff; /* Text color set to white */
+    background-color: #000; /* Background color set to black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('https://images.unsplash.com/photo-1554110397-9bac083977c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden; /* Prevents scrolling on the body */
 }
 
-/* Add styles for the loading screen */
-.loading-overlay {
-    display: none; /* Hide by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    text-align: center;
-    line-height: 100vh;
-    font-size: 24px;
-    z-index: 1000;
+/* Dark Theme */
+.dark-theme body {
+    color: #fff; /* Text color set to white */
+    background-color: #000; /* Background color set to black */
 }
-
 
 .container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    background: #ffffff;
+    background: #333; /* Darker background for the container */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     box-sizing: border-box;
@@ -49,13 +38,13 @@ body {
 header {
     text-align: center;
     padding: 20px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #555; /* Adjusted color for dark theme */
     margin-bottom: 20px;
 }
 
 h1 {
     margin: 0;
-    color: #333;
+    color: #fff; /* Text color set to white */
     font-size: 2em;
     font-weight: 700;
     letter-spacing: 1px;
@@ -84,17 +73,19 @@ form {
 
 label {
     font-weight: 600;
-    color: #555;
+    color: #ddd; /* Lighter color for labels in dark theme */
     margin-bottom: 5px;
 }
 
 input[type="text"], input[type="number"] {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #555; /* Darker border color */
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 16px;
+    color: #fff; /* Text color set to white */
+    background-color: #222; /* Darker background for inputs */
 }
 
 button {
@@ -121,29 +112,29 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-    background-color: #fff;
+    background-color: #333; /* Darker background for the table */
     border-radius: 6px;
     overflow: hidden;
 }
 
 table, th, td {
-    border: 1px solid #ddd;
+    border: 1px solid #555; /* Darker border color */
 }
 
 th, td {
     padding: 12px;
     text-align: left;
     font-size: 16px;
+    color: #fff; /* Text color set to white */
 }
 
 th {
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: #444; /* Darker background for headers */
     font-weight: 600;
 }
 
 tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #222; /* Darker background for even rows */
 }
 
 a {
@@ -175,12 +166,12 @@ a:hover {
 footer {
     text-align: center;
     padding: 20px;
-    border-top: 2px solid #f0f0f0;
+    border-top: 2px solid #555; /* Adjusted color for dark theme */
 }
 
 footer p, footer a {
     margin: 0;
-    color: #555;
+    color: #ddd; /* Lighter color for footer text */
 }
 
 footer a {
@@ -194,21 +185,21 @@ footer a:hover {
 
 footer p {
     font-size: 14px;
-    color: #777;
+    color: #888; /* Lighter color for footer text */
 }
 
-.button {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #28a745;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 16px;
+/* Loading screen styles */
+.loading-overlay {
+    display: none; /* Hide by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
     text-align: center;
-    transition: background-color 0.3s ease;
-}
-
-.button:hover {
-    background-color: #218838;
+    line-height: 100vh;
+    font-size: 24px;
+    z-index: 1000;
 }
