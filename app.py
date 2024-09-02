@@ -110,53 +110,68 @@ def fetch_crossref_details(title):
             }
     return {'journal_or_conference': 'N/A', 'publisher': 'N/A'}
 
-def save_to_excel(journals, conferences, miscellaneous):
+def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_type='all'):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        if journals:
+        
+        if selected_type in ['all', 'journal']:
             journal_data = []
-            for year, papers in sorted(journals.items()):
-                for paper in papers:
-                    journal_data.append({
-                        'Year': year,
-                        'Type': 'Journal',
-                        'Title': paper['Title'],
-                        'Citation Link': paper['Citation Link'],
-                        'Venue': paper.get('journal_or_conference', 'N/A'),
-                        'Publisher': paper['Publisher'],
-                        'Cited By': paper['Cited By']
-                    })
+            if journals:
+                for year, papers in sorted(journals.items()):
+                    for paper in papers:
+                        journal_data.append({
+                            'Year': year,
+                            'Type': 'Journal',
+                            'Title': paper['Title'],
+                            'Citation Link': paper['Citation Link'],
+                            'Venue': paper.get('journal_or_conference', 'N/A'),
+                            'Publisher': paper['Publisher'],
+                            'Cited By': paper['Cited By']
+                        })
             journal_df = pd.DataFrame(journal_data)
-            if not journal_df.empty:
-                journal_df = journal_df.dropna(axis=1, how='all')
-                journal_df.to_excel(writer, sheet_name='Journals', index=False)
+            if journal_df.empty:
+                journal_df = pd.DataFrame(columns=['Year', 'Type', 'Title', 'Citation Link', 'Venue', 'Publisher', 'Cited By'])
+            journal_df.to_excel(writer, sheet_name='Journals', index=False)
 
-        if conferences:
+        if selected_type in ['all', 'conference']:
             conference_data = []
-            for year, papers in sorted(conferences.items()):
-                for paper in papers:
-                    conference_data.append({
-                        'Year': year,
-                        'Type': 'Conference',
+            if conferences:
+                for year, papers in sorted(conferences.items()):
+                    for paper in papers:
+                        conference_data.append({
+                            'Year': year,
+                            'Type': 'Conference',
+                            'Title': paper['Title'],
+                            'Citation Link': paper['Citation Link'],
+                            'Venue': paper.get('journal_or_conference', 'N/A'),
+                            'Publisher': paper['Publisher'],
+                            'Cited By': paper['Cited By']
+                        })
+            conference_df = pd.DataFrame(conference_data)
+            if conference_df.empty:
+                conference_df = pd.DataFrame(columns=['Year', 'Type', 'Title', 'Citation Link', 'Venue', 'Publisher', 'Cited By'])
+            conference_df.to_excel(writer, sheet_name='Conferences', index=False)
+
+        if selected_type in ['all', 'miscellaneous']:
+            misc_data = []
+            if miscellaneous:
+                for paper in miscellaneous:
+                    misc_data.append({
                         'Title': paper['Title'],
                         'Citation Link': paper['Citation Link'],
-                        'Venue': paper.get('journal_or_conference', 'N/A'),
+                        'Venue': paper['Venue'],
                         'Publisher': paper['Publisher'],
-                        'Cited By': paper['Cited By']
+                        'Cited By': paper['Cited By'],
+                        'Year': paper['Year']
                     })
-            conference_df = pd.DataFrame(conference_data)
-            if not conference_df.empty:
-                conference_df = conference_df.dropna(axis=1, how='all')
-                conference_df.to_excel(writer, sheet_name='Conferences', index=False)
-
-        if miscellaneous:
-            miscellaneous_df = pd.DataFrame(miscellaneous)
-            if not miscellaneous_df.empty:
-                miscellaneous_df = miscellaneous_df.dropna(axis=1, how='all')
-                miscellaneous_df.to_excel(writer, sheet_name='Miscellaneous', index=False)
+            miscellaneous_df = pd.DataFrame(misc_data)
+            if miscellaneous_df.empty:
+                miscellaneous_df = pd.DataFrame(columns=['Title', 'Citation Link', 'Venue', 'Publisher', 'Cited By', 'Year'])
+            miscellaneous_df.to_excel(writer, sheet_name='Miscellaneous', index=False)
 
     output.seek(0)
     return output
+
 
 def parse_excel(file):
     df = pd.read_excel(file)
@@ -260,11 +275,12 @@ def download():
     author_name = request.args.get('author_name')
     global jour, conf, misc
     publication_type = request.args.get('publication_type')
+    
     if publication_type == 'journal':
-        excel_file = save_to_excel(jour, {}, [])
+        excel_file = save_to_excel(journals=jour, selected_type='journal')
         return send_file(excel_file, as_attachment=True, download_name='publications_journals.xlsx')
     elif publication_type == 'conference':
-        excel_file = save_to_excel({}, conf, [])
+        excel_file = save_to_excel(conferences=conf, selected_type='conference')
         return send_file(excel_file, as_attachment=True, download_name='publications_conf.xlsx')
     elif publication_type == 'docjour':
         docx_file = save_to_docx(jour, {}, [])
@@ -272,12 +288,13 @@ def download():
     elif publication_type == 'docconf':
         docx_file = save_to_docx({}, conf, [])
         return send_file(docx_file, as_attachment=True, download_name='publications_conf.docx')
-    elif publication_type=='docall':
+    elif publication_type == 'docall':
         docx_file = save_to_docx(jour, conf, misc)
         return send_file(docx_file, as_attachment=True, download_name='publications.docx')
 
-    excel_file = save_to_excel(jour, conf, misc)
+    excel_file = save_to_excel(journals=jour, conferences=conf, miscellaneous=misc, selected_type='all')
     return send_file(excel_file, as_attachment=True, download_name='publications.xlsx')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
