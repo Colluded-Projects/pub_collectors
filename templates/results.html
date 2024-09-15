@@ -18,11 +18,11 @@
                 <a href="{{ download_url }}&publication_type=journal" class="button">Download Journal Papers</a>
                 <a href="{{ download_url }}&publication_type=conference" class="button">Download Conference Papers</a>
                 <a href="{{ download_url }}" class="button">Download All Papers</a>
-                <br><br><a href="{{ download_url }}&publication_type=docjour" class="button">Download Journal Papers in DOCX</a>
+                <br><br>
+                <a href="{{ download_url }}&publication_type=docjour" class="button">Download Journal Papers in DOCX</a>
                 <a href="{{ download_url }}&publication_type=docconf" class="button">Download Conference Papers in DOCX</a>
                 <a href="{{ download_url }}&publication_type=docall" class="button">Download All Papers in DOCX</a>
             </div>
-            
         </header>
         <main>
             {% if journals %}
@@ -31,6 +31,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>#</th> 
                                 <th>Year</th>
                                 <th>Title</th>
                                 <th>Citation Link</th>
@@ -43,6 +44,7 @@
                             {% for year, papers in journals.items() %}
                                 {% for paper in papers %}
                                     <tr>
+                                        <td>{{ loop.index }}</td> 
                                         <td>{{ year }}</td>
                                         <td>{{ paper.Title }}</td>
                                         <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
@@ -62,6 +64,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Year</th>
                                 <th>Title</th>
                                 <th>Citation Link</th>
@@ -74,6 +77,7 @@
                             {% for year, papers in conferences.items() %}
                                 {% for paper in papers %}
                                     <tr>
+                                        <td>{{ loop.index }}</td> 
                                         <td>{{ year }}</td>
                                         <td>{{ paper.Title }}</td>
                                         <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
@@ -93,6 +97,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>#</th> 
                                 <th>Title</th>
                                 <th>Citation Link</th>
                                 <th>Venue</th>
@@ -104,6 +109,7 @@
                         <tbody>
                             {% for paper in miscellaneous %}
                                 <tr>
+                                    <td>{{ loop.index }}</td> 
                                     <td>{{ paper.Title }}</td>
                                     <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
                                     <td>{{ paper.Venue }}</td>

@@ -153,18 +153,18 @@ def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_
             conference_df.to_excel(writer, sheet_name='Conferences', index=False)
 
         if selected_type in ['all', 'miscellaneous']:
-            misc_data = []
-            if miscellaneous:
-                for paper in miscellaneous:
-                    misc_data.append({
-                        'Title': paper['Title'],
-                        'Citation Link': paper['Citation Link'],
-                        'Venue': paper['Venue'],
-                        'Publisher': paper['Publisher'],
-                        'Cited By': paper['Cited By'],
-                        'Year': paper['Year']
-                    })
-            miscellaneous_df = pd.DataFrame(misc_data)
+            # misc_data = []
+            # if miscellaneous:
+            #     for paper in miscellaneous:
+            #         misc_data.append({
+            #             'Title': paper['Title'],
+            #             'Citation Link': paper['Citation Link'],
+            #             'Venue': paper['Venue'],
+            #             'Publisher': paper['Publisher'],
+            #             'Cited By': paper['Cited By'],
+            #             'Year': paper['Year']
+            #         })
+            miscellaneous_df = pd.DataFrame(miscellaneous)
             if miscellaneous_df.empty:
                 miscellaneous_df = pd.DataFrame(columns=['Title', 'Citation Link', 'Venue', 'Publisher', 'Cited By', 'Year'])
             miscellaneous_df.to_excel(writer, sheet_name='Miscellaneous', index=False)
@@ -223,17 +223,17 @@ def save_to_docx(journals, conferences, miscellaneous):
             })
     add_table('Conferences', conference_data)
 
-    misc_data = []
-    for paper in miscellaneous:
-        misc_data.append({
-            'Title': paper['Title'],
-            'Citation Link': paper['Citation Link'],
-            'Venue': paper['Venue'],
-            'Publisher': paper['Publisher'],
-            'Cited By': paper['Cited By'],
-            'Year': paper['Year']
-        })
-    add_table('Miscellaneous', misc_data)
+    # misc_data = []
+    # for paper in miscellaneous:
+    #     misc_data.append({
+    #         'Title': paper['Title'],
+    #         'Citation Link': paper['Citation Link'],
+    #         'Venue': paper['Venue'],
+    #         'Publisher': paper['Publisher'],
+    #         'Cited By': paper['Cited By'],
+    #         'Year': paper['Year']
+    #     })
+    add_table('Miscellaneous', miscellaneous)
 
     output = io.BytesIO()
     doc.save(output)
