@@ -4,21 +4,7 @@ from scholarly import scholarly
 import requests
 import io
 from docx import Document
-#import google.generativeai as genai
-
 app = Flask(__name__)
-
-# Configure Gemini API key directly in the code
-#genai.configure(api_key="IzaSyA_DDm4lZdhMPbKoHt3ftuCT5iooeZNTZQ") #this is not mine lol
-
-# def generate_summary(text):
-#     try:
-#         model = genai.GenerativeModel("gemini-1.5-flash")
-#         response = model.generate_content(text)
-#         return response.text
-#     except Exception as e:
-#         print(f"An error occurred with Gemini API: {e}")
-#         return "Summary not available."
 
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
@@ -46,7 +32,6 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                     'Publisher': pub_info.get('publisher', 'N/A'),
                     'Cited By': pub.get('num_citations', 'N/A'),
                     'Year': year_label,
-                    #'Summary': generate_summary(pub_info.get('title', 'No Title'))
                 }
                 miscellaneous.append(details)
                 continue
@@ -71,7 +56,6 @@ def fetch_publications(author_name, start_year=None, end_year=None):
                 'Publisher': pub_info.get('publisher', 'N/A'),
                 'Cited By': pub.get('num_citations', 'N/A'),
                 'Year': year_label,
-                #'Summary': generate_summary(title)
             }
 
             crossref_data = fetch_crossref_details(title)
@@ -94,7 +78,7 @@ def fetch_publications(author_name, start_year=None, end_year=None):
         return None, None, None, "Summary not available."
 
 
-def fetch_crossref_details(title):
+def fetch_crossref_details(title):  
     url = f"https://api.crossref.org/works"
     params = {'query.title': title}
     response = requests.get(url, params=params)
@@ -125,7 +109,7 @@ def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_
                             'Title': paper['Title'],
                             'Citation Link': paper['Citation Link'],
                             'Venue': paper.get('journal_or_conference', 'N/A'),
-                            'Publisher': paper['Publisher'],
+                            'Publisher': paper['publisher'],
                             'Cited By': paper['Cited By']
                         })
             journal_df = pd.DataFrame(journal_data)
@@ -144,7 +128,7 @@ def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_
                             'Title': paper['Title'],
                             'Citation Link': paper['Citation Link'],
                             'Venue': paper.get('journal_or_conference', 'N/A'),
-                            'Publisher': paper['Publisher'],
+                            'Publisher': paper['publisher'],
                             'Cited By': paper['Cited By']
                         })
             conference_df = pd.DataFrame(conference_data)
@@ -193,7 +177,7 @@ def save_to_docx(journals, conferences, miscellaneous):
                 'Title': paper['Title'],
                 'Citation Link': paper['Citation Link'],
                 'Venue': paper.get('journal_or_conference', 'N/A'),
-                'Publisher': paper['Publisher'],
+                'Publisher': paper['publisher'],
                 'Cited By': paper['Cited By']
             })
     add_table('Journals', journal_data)
@@ -207,7 +191,7 @@ def save_to_docx(journals, conferences, miscellaneous):
                 'Title': paper['Title'],
                 'Citation Link': paper['Citation Link'],
                 'Venue': paper.get('journal_or_conference', 'N/A'),
-                'Publisher': paper['Publisher'],
+                'Publisher': paper['publisher'],
                 'Cited By': paper['Cited By']
             })
     add_table('Conferences', conference_data)
@@ -217,7 +201,7 @@ def save_to_docx(journals, conferences, miscellaneous):
             'Title': paper['Title'],
             'Citation Link': paper['Citation Link'],
             'Venue': paper['Venue'],
-            'Publisher': paper['Publisher'],
+            'Publisher': paper['publisher'],
             'Cited By': paper['Cited By'],
             'Year': paper['Year']
         })

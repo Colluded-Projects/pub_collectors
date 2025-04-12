@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <a href="/" class="button" style="position: absolute; top: 10px; left: 10px;"><</a>
     <div class="container">
         <header>
             <h1>Search Results for "{{ author_name }}"</h1>
@@ -48,8 +49,8 @@
                                         <td>{{ year }}</td>
                                         <td>{{ paper.Title }}</td>
                                         <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
-                                        <td>{{ paper.Venue }}</td>
-                                        <td>{{ paper.Publisher }}</td>
+                                        <td>{{ paper.journal_or_conference }}</td>
+                                        <td>{{ paper.publisher }}</td>
                                         <td>{{ paper['Cited By'] }}</td>
                                     </tr>
                                 {% endfor %}
@@ -81,8 +82,8 @@
                                         <td>{{ year }}</td>
                                         <td>{{ paper.Title }}</td>
                                         <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
-                                        <td>{{ paper.Venue }}</td>
-                                        <td>{{ paper.Publisher }}</td>
+                                        <td>{{ paper.journal_or_conference }}</td>
+                                        <td>{{ paper.publisher }}</td>
                                         <td>{{ paper['Cited By'] }}</td>
                                     </tr>
                                 {% endfor %}
@@ -112,8 +113,8 @@
                                     <td>{{ loop.index }}</td> 
                                     <td>{{ paper.Title }}</td>
                                     <td><a href="{{ paper['Citation Link'] }}" target="_blank">Link</a></td>
-                                    <td>{{ paper.Venue }}</td>
-                                    <td>{{ paper.Publisher }}</td>
+                                    <td>{{ paper.journal_or_conference }}</td>
+                                    <td>{{ paper.publisher }}</td>
                                     <td>{{ paper['Cited By'] }}</td>
                                     <td>{{ paper.Year }}</td>
                                 </tr>
