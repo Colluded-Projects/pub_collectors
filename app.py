@@ -6,6 +6,20 @@ import io
 from docx import Document
 app = Flask(__name__)
 
+def fetch_author_details(authors_list):
+
+    author_info = []
+    for name in authors_list:
+        search_query = scholarly.search_author(name)
+        author = next(search_query)
+        author = scholarly.fill(author)
+        author_info.append({
+            "name": author.get('name', 'N/A'),
+            "email": author.get('email', 'N/A, unable to fetch as email is often masked'),
+            "affiliation": author.get('affiliation', 'N/A'),
+            "citations": author.get('citedby', 'N/A')
+        })
+    return author_info
 def fetch_publications(author_name, start_year=None, end_year=None):
     try:
         search_query = scholarly.search_author(author_name)
@@ -147,9 +161,9 @@ def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_
 
 
 def parse_excel(file):
+    global authors_list
     df = pd.read_excel(file)
-    for author_nm in df.iloc[:, 0]:
-        return author_nm
+    authors_list = df.iloc[:, 0].tolist()
 
 def save_to_docx(journals, conferences, miscellaneous):
     doc = Document()
@@ -216,31 +230,38 @@ def save_to_docx(journals, conferences, miscellaneous):
 def index():
     if request.method == 'POST':
         file = request.files.get('file')
-        
-        if file:
-            author_name = parse_excel(file)
-            start_year = request.form.get('start_year')
-            end_year = request.form.get('end_year')
-            start_year = int(start_year) if start_year and start_year.isdigit() else None
-            end_year = int(end_year) if end_year and end_year.isdigit() else None
-
-            journals, conferences, miscellaneous, summary_text = fetch_publications(author_name, start_year, end_year)
-            global jour, conf, misc
-            jour = journals
-            conf = conferences
-            misc = miscellaneous
-
-            return render_template('results.html',
-                                   journals=jour,
-                                   conferences=conf,
-                                   miscellaneous=misc,
-                                   download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
-                                   author_name=author_name,
-                                   start_year=start_year,
-                                   end_year=end_year,
-                                   summary_text=summary_text)  # Include summary_text here
+        parse_excel(file)
+        global authors_data_for_dashboard, authors_list
+        authors_data_for_dashboard = fetch_author_details(authors_list)
+        return render_template('dashboard.html', authors=authors_data_for_dashboard)
 
     return render_template('index.html')
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if request.method == 'POST':
+        author_name = request.form.get('author_name')
+        start_year = request.form.get('start_year')
+        end_year = request.form.get('end_year')
+        start_year = int(start_year) if start_year and start_year.isdigit() else None
+        end_year = int(end_year) if end_year and end_year.isdigit() else None
+
+        journals, conferences, miscellaneous, summary_text = fetch_publications(author_name, start_year, end_year)
+        global jour, conf, misc
+        jour = journals
+        conf = conferences
+        misc = miscellaneous
+        return render_template('results.html',
+                               journals=jour,
+                               conferences=conf,
+                               miscellaneous=misc,
+                               download_url='/download?author_name=' + author_name + '&start_year=' + (str(start_year) if start_year else '') + '&end_year=' + (str(end_year) if end_year else ''),
+                               author_name=author_name,
+                               start_year=start_year,
+                               end_year=end_year,
+                               summary_text=summary_text)
+    global authors_data_for_dashboard
+    return render_template('dashboard.html', authors=authors_data_for_dashboard)
 
 @app.route('/download')
 def download():

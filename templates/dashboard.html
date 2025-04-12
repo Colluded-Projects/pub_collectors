@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Author Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .author-list {
+            list-style: none;
+            padding: 0;
+        }
+        .author-item {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .author-details {
+            flex-grow: 1;
+        }
+        .author-details p {
+            margin: 5px 0;
+        }
+        .view-details-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .view-details-btn:hover {
+            background-color: #0056b3;
+        }
+        /* Add styles for the loading screen */
+        .loading-overlay {
+            display: none; /* Hide by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-align: center;
+            line-height: 100vh;
+            font-size: 24px;
+            z-index: 1000;
+        }
+        #detailsForm {
+            display: none; /* Hide the form */
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">The result is loading. Please wait as it takes time to reach the servers and verify the data with external sources also.</div>
+    <a href="/" class="button" style="position: absolute; top: 10px; left: 10px;"><</a>
+    <div class="container">
+        <header>
+            <h1>Author Dashboard</h1>
+        </header>
+        <main>
+            <ul class="author-list">
+                {% if authors %}
+                {% for author in authors %}
+                <li class="author-item">
+                    <div class="author-details">
+                        <h3>{{ author.name }}</h3>
+                        <p><strong>Email:</strong> {{ author.email }}</p>
+                        <p><strong>Affiliation:</strong> {{ author.affiliation }}</p>
+                        <p><strong>Citations:</strong> {{ author.citations }}</p>
+                    </div>
+                    <button class="view-details-btn" onclick="promptForYears('{{ author.name }}')">View Details</button>
+                </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+
+            <form id="detailsForm" method="POST" action="/dashboard">
+                <input type="hidden" id="author_name" name="author_name">
+                <input type="hidden" id="start_year" name="start_year">
+                <input type="hidden" id="end_year" name="end_year">
+            </form>
+        </main>
+        <footer>
+            <p>&copy; SIH 2024 TEAM: Pub. Collectors</p>
+        </footer>
+    </div>
+    <script>
+        function showLoadingScreen() {
+            document.getElementById('loadingOverlay').style.display = 'block';
+        }
+
+        function promptForYears(authorName) {
+            const startYear = prompt("Enter Start Year:");
+            if (startYear === null) return; // User cancelled
+
+            const endYear = prompt("Enter End Year:");
+            if (endYear === null) return; // User cancelled
+
+            document.getElementById('author_name').value = authorName;
+            document.getElementById('start_year').value = startYear;
+            document.getElementById('end_year').value = endYear;
+
+            showLoadingScreen(); // Show loading screen before submitting
+
+            document.getElementById('detailsForm').submit();
+        }
+    </script>
+</body>
+</html>-
