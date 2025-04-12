@@ -147,7 +147,7 @@ def save_to_excel(journals=None, conferences=None, miscellaneous=None, selected_
                         })
             conference_df = pd.DataFrame(conference_data)
             if conference_df.empty:
-                conference_df = pd.DataFrame(columns=['Year', 'Type', 'Title', 'Citation Link', 'Venue', 'Publisher', 'Cited By'])
+                conference_df = pd.DataFrame(columns=['Year', 'Type', 'Title', 'Citation Link', 'journal_or_conference', 'publisher', 'Cited By'])
             conference_df.to_excel(writer, sheet_name='Conferences', index=False)
 
         if selected_type in ['all', 'miscellaneous']:
@@ -214,8 +214,8 @@ def save_to_docx(journals, conferences, miscellaneous):
         misc_data.append({
             'Title': paper['Title'],
             'Citation Link': paper['Citation Link'],
-            'Venue': paper['Venue'],
-            'Publisher': paper['publisher'],
+            'Venue': paper.get('journal_or_conference', 'N/A'),
+            'Publisher': paper['Publisher'],
             'Cited By': paper['Cited By'],
             'Year': paper['Year']
         })
